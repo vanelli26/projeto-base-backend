@@ -3,6 +3,7 @@ const cors = require('cors');
 const authRoutes = require('./src/routes/auth');
 const bookRoutes = require('./src/routes/books');
 const userRoutes = require('./src/routes/users');
+const categoryRoutes = require('./src/routes/categories');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -20,6 +21,7 @@ app.use(express.json());
 app.use('/auth', authRoutes);
 app.use('/books', bookRoutes);
 app.use('/users', userRoutes);
+app.use('/categories', categoryRoutes);
 
 app.get('/', (req, res) => {
   res.json({
@@ -44,6 +46,13 @@ app.get('/', (req, res) => {
         'DELETE /books/:id': 'Deletar livro (admin only)',
         'POST /books/:id/borrow': 'Pegar livro emprestado (auth required)',
         'POST /books/:id/return': 'Devolver livro (auth required)'
+      },
+      categories: {
+        'GET /categories': 'Listar todas as categorias (auth required)',
+        'GET /categories/:id': 'Buscar categoria por ID (auth required)',
+        'POST /categories': 'Criar categoria (admin only)',
+        'PUT /categories/:id': 'Atualizar categoria (admin only)',
+        'DELETE /categories/:id': 'Deletar categoria (admin only)'
       }
     }
   });

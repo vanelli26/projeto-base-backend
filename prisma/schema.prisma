@@ -8,15 +8,20 @@ datasource db {
 }
 
 model User {
-  id       Int    @id @default(autoincrement())
-  username String @unique
+  id       Int     @id @default(autoincrement())
+  username String  @unique
   password String
   isAdmin  Boolean @default(false)
 }
 
 model Book {
-  id        Int    @id @default(autoincrement())
+  id        Int     @id @default(autoincrement())
   title     String
   author    String
   available Boolean @default(true)
+}
+
+model Category {
+  id   Int    @id @default(autoincrement())
+  nome String
 }
