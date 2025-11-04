@@ -5,7 +5,6 @@ yarn-debug.log*
 yarn-error.log*
 
 # Variáveis de ambiente
-.env
 .env.local
 .env.development.local
 .env.test.local
