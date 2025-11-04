@@ -2,6 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const authRoutes = require('./src/routes/auth');
 const bookRoutes = require('./src/routes/books');
+const userRoutes = require('./src/routes/users');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -18,6 +19,7 @@ app.use(express.json());
 
 app.use('/auth', authRoutes);
 app.use('/books', bookRoutes);
+app.use('/users', userRoutes);
 
 app.get('/', (req, res) => {
   res.json({
@@ -26,6 +28,12 @@ app.get('/', (req, res) => {
     endpoints: {
       auth: {
         'POST /auth/login': 'Login (retorna token)',
+      users: {
+        'GET /users': 'Listar todos os usuários (admin only)',
+        'GET /users/:id': 'Buscar usuário por ID (admin only)',
+        'DELETE /users/:id': 'Deletar usuário (admin only)',
+        'PATCH /users/:id/admin': 'Atualizar status de admin (admin only)'
+      },
         'POST /auth/register': 'Registrar novo usuário'
       },
       books: {

@@ -48,6 +48,119 @@ const userController = {
             console.error('Erro ao registrar usuário:', error);
             res.status(500).json({error: 'Erro interno do servidor'});
         }
+    },
+
+    async getUsers(req, res) {
+        try {
+            const users = await prisma.user.findMany({
+                select: {
+                    id: true,
+                    username: true,
+                    isAdmin: true
+                }
+            });
+
+            res.status(200).json(users);
+        } catch (error) {
+            console.error('Erro ao listar usuários:', error);
+            res.status(500).json({error: 'Erro interno do servidor'});
+        }
+    },
+
+    async getUserById(req, res) {
+        try {
+            const {id} = req.params;
+            const userId = parseInt(id);
+
+            if (isNaN(userId)) {
+                return res.status(400).json({error: 'ID inválido'});
+            }
+
+            const user = await prisma.user.findUnique({
+                where: {id: userId},
+                select: {
+                    id: true,
+                    username: true,
+                    isAdmin: true
+                }
+            });
+
+            if (!user) {
+                return res.status(404).json({error: 'Usuário não encontrado'});
+            }
+
+            res.status(200).json(user);
+        } catch (error) {
+            console.error('Erro ao buscar usuário:', error);
+            res.status(500).json({error: 'Erro interno do servidor'});
+        }
+    },
+
+    async deleteUser(req, res) {
+        try {
+            const {id} = req.params;
+            const userId = parseInt(id);
+
+            if (isNaN(userId)) {
+                return res.status(400).json({error: 'ID inválido'});
+            }
+
+            const user = await prisma.user.findUnique({
+                where: {id: userId}
+            });
+
+            if (!user) {
+                return res.status(404).json({error: 'Usuário não encontrado'});
+            }
+
+            await prisma.user.delete({
+                where: {id: userId}
+            });
+
+            res.status(204).send();
+        } catch (error) {
+            console.error('Erro ao deletar usuário:', error);
+            res.status(500).json({error: 'Erro interno do servidor'});
+        }
+    },
+
+    async updateUserAdmin(req, res) {
+        try {
+            const {id} = req.params;
+            const {isAdmin} = req.body;
+            const userId = parseInt(id);
+
+            if (isNaN(userId)) {
+                return res.status(400).json({error: 'ID inválido'});
+            }
+
+            if (typeof isAdmin !== 'boolean') {
+                return res.status(400).json({error: 'isAdmin deve ser um boolean'});
+            }
+
+            const user = await prisma.user.findUnique({
+                where: {id: userId}
+            });
+
+            if (!user) {
+                return res.status(404).json({error: 'Usuário não encontrado'});
+            }
+
+            const updatedUser = await prisma.user.update({
+                where: {id: userId},
+                data: {isAdmin},
+                select: {
+                    id: true,
+                    username: true,
+                    isAdmin: true
+                }
+            });
+
+            res.status(200).json(updatedUser);
+        } catch (error) {
+            console.error('Erro ao atualizar usuário:', error);
+            res.status(500).json({error: 'Erro interno do servidor'});
+        }
     }
 };
 
