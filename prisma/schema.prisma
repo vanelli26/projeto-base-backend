@@ -22,8 +22,9 @@ model Book {
 }
 
 model Category {
-  id   Int    @id @default(autoincrement())
-  nome String
+  id          Int          @id @default(autoincrement())
+  nome        String
+  lancamentos Lancamento[]
 }
 
 model Conta {
@@ -34,9 +35,11 @@ model Conta {
 }
 
 model Lancamento {
-  id        Int      @id @default(autoincrement())
-  descricao String
-  valor     Float
-  data      DateTime
-  tipo      String // 'RECEITA' ou 'DESPESA'
+  id          Int       @id @default(autoincrement())
+  descricao   String
+  valor       Float
+  data        DateTime
+  tipo        String // 'RECEITA' ou 'DESPESA'
+  categoriaId Int?
+  categoria   Category? @relation(fields: [categoriaId], references: [id])
 }

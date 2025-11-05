@@ -10,7 +10,14 @@ const lancamentoController = {
           descricao: true,
           valor: true,
           data: true,
-          tipo: true
+          tipo: true,
+          categoriaId: true,
+          categoria: {
+            select: {
+              id: true,
+              nome: true
+            }
+          }
         },
         orderBy: {
           data: 'desc'
@@ -35,7 +42,14 @@ const lancamentoController = {
           descricao: true,
           valor: true,
           data: true,
-          tipo: true
+          tipo: true,
+          categoriaId: true,
+          categoria: {
+            select: {
+              id: true,
+              nome: true
+            }
+          }
         }
       });
 
@@ -52,7 +66,7 @@ const lancamentoController = {
 
   async createLancamento(req, res) {
     try {
-      const { descricao, valor, data, tipo } = req.body;
+      const { descricao, valor, data, tipo, categoriaId } = req.body;
 
       // Validações
       if (!descricao) {
@@ -75,12 +89,32 @@ const lancamentoController = {
         return res.status(400).json({ error: 'Tipo deve ser RECEITA ou DESPESA' });
       }
 
+      // Validar se categoria existe, caso categoriaId seja fornecido
+      if (categoriaId) {
+        const categoria = await prisma.category.findUnique({
+          where: { id: parseInt(categoriaId) }
+        });
+
+        if (!categoria) {
+          return res.status(404).json({ error: 'Categoria não encontrada' });
+        }
+      }
+
       const lancamento = await prisma.lancamento.create({
         data: {
           descricao,
           valor: parseFloat(valor),
           data: new Date(data),
-          tipo
+          tipo,
+          categoriaId: categoriaId ? parseInt(categoriaId) : null
+        },
+        include: {
+          categoria: {
+            select: {
+              id: true,
+              nome: true
+            }
+          }
         }
       });
 
@@ -91,7 +125,9 @@ const lancamentoController = {
           descricao: lancamento.descricao,
           valor: lancamento.valor,
           data: lancamento.data,
-          tipo: lancamento.tipo
+          tipo: lancamento.tipo,
+          categoriaId: lancamento.categoriaId,
+          categoria: lancamento.categoria
         }
       });
     } catch (error) {
@@ -103,7 +139,7 @@ const lancamentoController = {
   async updateLancamento(req, res) {
     try {
       const lancamentoId = parseInt(req.params.id);
-      const { descricao, valor, data, tipo } = req.body;
+      const { descricao, valor, data, tipo, categoriaId } = req.body;
 
       const existingLancamento = await prisma.lancamento.findUnique({
         where: { id: lancamentoId }
@@ -118,15 +154,37 @@ const lancamentoController = {
         return res.status(400).json({ error: 'Tipo deve ser RECEITA ou DESPESA' });
       }
 
+      // Validar se categoria existe, caso categoriaId seja fornecido
+      if (categoriaId !== undefined && categoriaId !== null) {
+        const categoria = await prisma.category.findUnique({
+          where: { id: parseInt(categoriaId) }
+        });
+
+        if (!categoria) {
+          return res.status(404).json({ error: 'Categoria não encontrada' });
+        }
+      }
+
       const updateData = {};
       if (descricao !== undefined) updateData.descricao = descricao;
       if (valor !== undefined) updateData.valor = parseFloat(valor);
       if (data !== undefined) updateData.data = new Date(data);
       if (tipo !== undefined) updateData.tipo = tipo;
+      if (categoriaId !== undefined) {
+        updateData.categoriaId = categoriaId ? parseInt(categoriaId) : null;
+      }
 
       const lancamento = await prisma.lancamento.update({
         where: { id: lancamentoId },
-        data: updateData
+        data: updateData,
+        include: {
+          categoria: {
+            select: {
+              id: true,
+              nome: true
+            }
+          }
+        }
       });
 
       res.json({
@@ -136,7 +194,9 @@ const lancamentoController = {
           descricao: lancamento.descricao,
           valor: lancamento.valor,
           data: lancamento.data,
-          tipo: lancamento.tipo
+          tipo: lancamento.tipo,
+          categoriaId: lancamento.categoriaId,
+          categoria: lancamento.categoria
         }
       });
     } catch (error) {
