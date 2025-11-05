@@ -71,6 +71,8 @@ GET /lancamentos/:id
 
 POST /lancamentos
 
+POST /lancamentos/parcelado (criar parcelamento automático)
+
 PUT /lancamentos/:id
 
 DELETE /lancamentos/:id

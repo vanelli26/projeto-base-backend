@@ -35,11 +35,16 @@ model Conta {
 }
 
 model Lancamento {
-  id          Int       @id @default(autoincrement())
-  descricao   String
-  valor       Float
-  data        DateTime
-  tipo        String // 'RECEITA' ou 'DESPESA'
-  categoriaId Int?
-  categoria   Category? @relation(fields: [categoriaId], references: [id])
+  id              Int          @id @default(autoincrement())
+  descricao       String
+  valor           Float
+  data            DateTime
+  tipo            String // 'RECEITA' ou 'DESPESA'
+  categoriaId     Int?
+  categoria       Category?    @relation(fields: [categoriaId], references: [id])
+  numeroParcelas  Int? // Número total de parcelas
+  parcelaAtual    Int? // Número da parcela atual
+  lancamentoPaiId Int? // ID do lançamento pai (se for uma parcela)
+  lancamentoPai   Lancamento?  @relation("ParcelasLancamento", fields: [lancamentoPaiId], references: [id], onDelete: Cascade)
+  parcelas        Lancamento[] @relation("ParcelasLancamento")
 }
