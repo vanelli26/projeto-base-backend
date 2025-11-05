@@ -4,6 +4,7 @@ const authRoutes = require('./src/routes/auth');
 const bookRoutes = require('./src/routes/books');
 const userRoutes = require('./src/routes/users');
 const categoryRoutes = require('./src/routes/categories');
+const contaRoutes = require('./src/routes/contas');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -22,6 +23,7 @@ app.use('/auth', authRoutes);
 app.use('/books', bookRoutes);
 app.use('/users', userRoutes);
 app.use('/categories', categoryRoutes);
+app.use('/contas', contaRoutes);
 
 app.get('/', (req, res) => {
   res.json({
@@ -53,6 +55,13 @@ app.get('/', (req, res) => {
         'POST /categories': 'Criar categoria (admin only)',
         'PUT /categories/:id': 'Atualizar categoria (admin only)',
         'DELETE /categories/:id': 'Deletar categoria (admin only)'
+      },
+      contas: {
+        'GET /contas': 'Listar todas as contas (auth required)',
+        'GET /contas/:id': 'Buscar conta por ID (auth required)',
+        'POST /contas': 'Criar conta (admin only)',
+        'PUT /contas/:id': 'Atualizar conta (admin only)',
+        'DELETE /contas/:id': 'Deletar conta (admin only)'
       }
     }
   });

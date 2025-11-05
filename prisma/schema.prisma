@@ -25,3 +25,10 @@ model Category {
   id   Int    @id @default(autoincrement())
   nome String
 }
+
+model Conta {
+  id        Int    @id @default(autoincrement())
+  descricao String
+  saldo     Float
+  limite    Float
+}
