@@ -5,6 +5,7 @@ const bookRoutes = require('./src/routes/books');
 const userRoutes = require('./src/routes/users');
 const categoryRoutes = require('./src/routes/categories');
 const contaRoutes = require('./src/routes/contas');
+const lancamentoRoutes = require('./src/routes/lancamentos');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -24,6 +25,7 @@ app.use('/books', bookRoutes);
 app.use('/users', userRoutes);
 app.use('/categories', categoryRoutes);
 app.use('/contas', contaRoutes);
+app.use('/lancamentos', lancamentoRoutes);
 
 app.get('/', (req, res) => {
   res.json({
@@ -62,6 +64,13 @@ app.get('/', (req, res) => {
         'POST /contas': 'Criar conta (admin only)',
         'PUT /contas/:id': 'Atualizar conta (admin only)',
         'DELETE /contas/:id': 'Deletar conta (admin only)'
+      },
+      lancamentos: {
+        'GET /lancamentos': 'Listar todos os lançamentos (auth required)',
+        'GET /lancamentos/:id': 'Buscar lançamento por ID (auth required)',
+        'POST /lancamentos': 'Criar lançamento (auth required)',
+        'PUT /lancamentos/:id': 'Atualizar lançamento (auth required)',
+        'DELETE /lancamentos/:id': 'Deletar lançamento (auth required)'
       }
     }
   });

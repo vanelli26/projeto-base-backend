@@ -32,3 +32,11 @@ model Conta {
   saldo     Float
   limite    Float
 }
+
+model Lancamento {
+  id        Int      @id @default(autoincrement())
+  descricao String
+  valor     Float
+  data      DateTime
+  tipo      String // 'RECEITA' ou 'DESPESA'
+}
