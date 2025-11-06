@@ -59,4 +59,5 @@ model Lancamento {
   lancamentoPaiId Int? // ID do lançamento pai (se for uma parcela)
   lancamentoPai   Lancamento?  @relation("ParcelasLancamento", fields: [lancamentoPaiId], references: [id], onDelete: Cascade)
   parcelas        Lancamento[] @relation("ParcelasLancamento")
+  efetivado       Boolean      @default(false)
 }
