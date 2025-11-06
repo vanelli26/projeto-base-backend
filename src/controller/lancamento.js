@@ -16,6 +16,7 @@ const lancamentoController = {
           tipo: true,
           userId: true,
           categoriaId: true,
+          contaId: true,
           numeroParcelas: true,
           parcelaAtual: true,
           lancamentoPaiId: true,
@@ -23,6 +24,12 @@ const lancamentoController = {
             select: {
               id: true,
               nome: true
+            }
+          },
+          conta: {
+            select: {
+              id: true,
+              descricao: true
             }
           }
         },
@@ -56,6 +63,7 @@ const lancamentoController = {
           tipo: true,
           userId: true,
           categoriaId: true,
+          contaId: true,
           numeroParcelas: true,
           parcelaAtual: true,
           lancamentoPaiId: true,
@@ -63,6 +71,13 @@ const lancamentoController = {
             select: {
               id: true,
               nome: true
+            }
+          },
+          conta: {
+            select: {
+              id: true,
+              descricao: true,
+              saldo: true
             }
           },
           parcelas: {
@@ -93,7 +108,7 @@ const lancamentoController = {
 
   async createLancamento(req, res) {
     try {
-      const { descricao, valor, data, tipo, categoriaId, numeroParcelas, parcelaAtual, lancamentoPaiId } = req.body;
+      const { descricao, valor, data, tipo, categoriaId, contaId, numeroParcelas, parcelaAtual, lancamentoPaiId } = req.body;
       const userId = req.user.id;
 
       // Validações
@@ -131,6 +146,20 @@ const lancamentoController = {
         }
       }
 
+      // Validar se conta existe e pertence ao usuário
+      if (contaId) {
+        const conta = await prisma.conta.findFirst({
+          where: {
+            id: parseInt(contaId),
+            userId
+          }
+        });
+
+        if (!conta) {
+          return res.status(404).json({ error: 'Conta não encontrada' });
+        }
+      }
+
       // Validar lancamentoPaiId se fornecido e pertence ao usuário
       if (lancamentoPaiId) {
         const lancamentoPai = await prisma.lancamento.findFirst({
@@ -162,6 +191,7 @@ const lancamentoController = {
           tipo,
           userId,
           categoriaId: categoriaId ? parseInt(categoriaId) : null,
+          contaId: contaId ? parseInt(contaId) : null,
           numeroParcelas: numeroParcelas ? parseInt(numeroParcelas) : null,
           parcelaAtual: parcelaAtual ? parseInt(parcelaAtual) : null,
           lancamentoPaiId: lancamentoPaiId ? parseInt(lancamentoPaiId) : null
@@ -171,6 +201,12 @@ const lancamentoController = {
             select: {
               id: true,
               nome: true
+            }
+          },
+          conta: {
+            select: {
+              id: true,
+              descricao: true
             }
           }
         }
@@ -186,10 +222,12 @@ const lancamentoController = {
           tipo: lancamento.tipo,
           userId: lancamento.userId,
           categoriaId: lancamento.categoriaId,
+          contaId: lancamento.contaId,
           numeroParcelas: lancamento.numeroParcelas,
           parcelaAtual: lancamento.parcelaAtual,
           lancamentoPaiId: lancamento.lancamentoPaiId,
-          categoria: lancamento.categoria
+          categoria: lancamento.categoria,
+          conta: lancamento.conta
         }
       });
     } catch (error) {
@@ -201,7 +239,7 @@ const lancamentoController = {
   async updateLancamento(req, res) {
     try {
       const lancamentoId = parseInt(req.params.id);
-      const { descricao, valor, data, tipo, categoriaId, numeroParcelas, parcelaAtual, lancamentoPaiId } = req.body;
+      const { descricao, valor, data, tipo, categoriaId, contaId, numeroParcelas, parcelaAtual, lancamentoPaiId } = req.body;
       const userId = req.user.id;
 
       const existingLancamento = await prisma.lancamento.findFirst({
@@ -234,6 +272,20 @@ const lancamentoController = {
         }
       }
 
+      // Validar se conta existe e pertence ao usuário
+      if (contaId !== undefined && contaId !== null) {
+        const conta = await prisma.conta.findFirst({
+          where: {
+            id: parseInt(contaId),
+            userId
+          }
+        });
+
+        if (!conta) {
+          return res.status(404).json({ error: 'Conta não encontrada' });
+        }
+      }
+
       // Validar lancamentoPaiId se fornecido e pertence ao usuário
       if (lancamentoPaiId !== undefined && lancamentoPaiId !== null) {
         const lancamentoPai = await prisma.lancamento.findFirst({
@@ -261,6 +313,9 @@ const lancamentoController = {
       if (categoriaId !== undefined) {
         updateData.categoriaId = categoriaId ? parseInt(categoriaId) : null;
       }
+      if (contaId !== undefined) {
+        updateData.contaId = contaId ? parseInt(contaId) : null;
+      }
       if (numeroParcelas !== undefined) {
         updateData.numeroParcelas = numeroParcelas ? parseInt(numeroParcelas) : null;
       }
@@ -280,6 +335,12 @@ const lancamentoController = {
               id: true,
               nome: true
             }
+          },
+          conta: {
+            select: {
+              id: true,
+              descricao: true
+            }
           }
         }
       });
@@ -294,10 +355,12 @@ const lancamentoController = {
           tipo: lancamento.tipo,
           userId: lancamento.userId,
           categoriaId: lancamento.categoriaId,
+          contaId: lancamento.contaId,
           numeroParcelas: lancamento.numeroParcelas,
           parcelaAtual: lancamento.parcelaAtual,
           lancamentoPaiId: lancamento.lancamentoPaiId,
-          categoria: lancamento.categoria
+          categoria: lancamento.categoria,
+          conta: lancamento.conta
         }
       });
     } catch (error) {
@@ -335,7 +398,7 @@ const lancamentoController = {
 
   async createLancamentoParcelado(req, res) {
     try {
-      const { descricao, valorTotal, dataInicial, tipo, categoriaId, numeroParcelas } = req.body;
+      const { descricao, valorTotal, dataInicial, tipo, categoriaId, contaId, numeroParcelas } = req.body;
       const userId = req.user.id;
 
       // Validações
@@ -377,6 +440,20 @@ const lancamentoController = {
         }
       }
 
+      // Validar se conta existe e pertence ao usuário
+      if (contaId) {
+        const conta = await prisma.conta.findFirst({
+          where: {
+            id: parseInt(contaId),
+            userId
+          }
+        });
+
+        if (!conta) {
+          return res.status(404).json({ error: 'Conta não encontrada' });
+        }
+      }
+
       const valorParcela = parseFloat(valorTotal) / parseInt(numeroParcelas);
       const dataBase = new Date(dataInicial);
       const parcelas = [];
@@ -390,6 +467,7 @@ const lancamentoController = {
           tipo,
           userId,
           categoriaId: categoriaId ? parseInt(categoriaId) : null,
+          contaId: contaId ? parseInt(contaId) : null,
           numeroParcelas: parseInt(numeroParcelas),
           parcelaAtual: 0
         }
@@ -408,6 +486,7 @@ const lancamentoController = {
             tipo,
             userId,
             categoriaId: categoriaId ? parseInt(categoriaId) : null,
+            contaId: contaId ? parseInt(contaId) : null,
             numeroParcelas: parseInt(numeroParcelas),
             parcelaAtual: i,
             lancamentoPaiId: lancamentoPai.id
@@ -417,6 +496,12 @@ const lancamentoController = {
               select: {
                 id: true,
                 nome: true
+              }
+            },
+            conta: {
+              select: {
+                id: true,
+                descricao: true
               }
             }
           }
@@ -439,7 +524,8 @@ const lancamentoController = {
           valor: p.valor,
           data: p.data,
           parcelaAtual: p.parcelaAtual,
-          categoria: p.categoria
+          categoria: p.categoria,
+          conta: p.conta
         }))
       });
     } catch (error) {

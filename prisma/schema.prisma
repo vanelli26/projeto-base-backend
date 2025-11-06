@@ -33,12 +33,13 @@ model Category {
 }
 
 model Conta {
-  id        Int    @id @default(autoincrement())
-  descricao String
-  saldo     Float
-  limite    Float
-  userId    Int
-  user      User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id          Int          @id @default(autoincrement())
+  descricao   String
+  saldo       Float
+  limite      Float
+  userId      Int
+  user        User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  lancamentos Lancamento[]
 }
 
 model Lancamento {
@@ -51,6 +52,8 @@ model Lancamento {
   user            User         @relation(fields: [userId], references: [id], onDelete: Cascade)
   categoriaId     Int?
   categoria       Category?    @relation(fields: [categoriaId], references: [id])
+  contaId         Int?
+  conta           Conta?       @relation(fields: [contaId], references: [id])
   numeroParcelas  Int? // Número total de parcelas
   parcelaAtual    Int? // Número da parcela atual
   lancamentoPaiId Int? // ID do lançamento pai (se for uma parcela)
