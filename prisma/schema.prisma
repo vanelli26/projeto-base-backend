@@ -8,10 +8,13 @@ datasource db {
 }
 
 model User {
-  id       Int     @id @default(autoincrement())
-  username String  @unique
-  password String
-  isAdmin  Boolean @default(false)
+  id          Int          @id @default(autoincrement())
+  username    String       @unique
+  password    String
+  isAdmin     Boolean      @default(false)
+  categories  Category[]
+  contas      Conta[]
+  lancamentos Lancamento[]
 }
 
 model Book {
@@ -24,6 +27,8 @@ model Book {
 model Category {
   id          Int          @id @default(autoincrement())
   nome        String
+  userId      Int
+  user        User         @relation(fields: [userId], references: [id], onDelete: Cascade)
   lancamentos Lancamento[]
 }
 
@@ -32,6 +37,8 @@ model Conta {
   descricao String
   saldo     Float
   limite    Float
+  userId    Int
+  user      User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model Lancamento {
@@ -40,6 +47,8 @@ model Lancamento {
   valor           Float
   data            DateTime
   tipo            String // 'RECEITA' ou 'DESPESA'
+  userId          Int
+  user            User         @relation(fields: [userId], references: [id], onDelete: Cascade)
   categoriaId     Int?
   categoria       Category?    @relation(fields: [categoriaId], references: [id])
   numeroParcelas  Int? // Número total de parcelas

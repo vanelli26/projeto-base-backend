@@ -4,13 +4,17 @@ const prisma = new PrismaClient();
 const lancamentoController = {
   async getAllLancamentos(req, res) {
     try {
+      const userId = req.user.id;
+
       const lancamentos = await prisma.lancamento.findMany({
+        where: { userId },
         select: {
           id: true,
           descricao: true,
           valor: true,
           data: true,
           tipo: true,
+          userId: true,
           categoriaId: true,
           numeroParcelas: true,
           parcelaAtual: true,
@@ -37,15 +41,20 @@ const lancamentoController = {
   async getLancamentoById(req, res) {
     try {
       const lancamentoId = parseInt(req.params.id);
+      const userId = req.user.id;
 
-      const lancamento = await prisma.lancamento.findUnique({
-        where: { id: lancamentoId },
+      const lancamento = await prisma.lancamento.findFirst({
+        where: {
+          id: lancamentoId,
+          userId
+        },
         select: {
           id: true,
           descricao: true,
           valor: true,
           data: true,
           tipo: true,
+          userId: true,
           categoriaId: true,
           numeroParcelas: true,
           parcelaAtual: true,
@@ -85,6 +94,7 @@ const lancamentoController = {
   async createLancamento(req, res) {
     try {
       const { descricao, valor, data, tipo, categoriaId, numeroParcelas, parcelaAtual, lancamentoPaiId } = req.body;
+      const userId = req.user.id;
 
       // Validações
       if (!descricao) {
@@ -107,10 +117,13 @@ const lancamentoController = {
         return res.status(400).json({ error: 'Tipo deve ser RECEITA ou DESPESA' });
       }
 
-      // Validar se categoria existe, caso categoriaId seja fornecido
+      // Validar se categoria existe e pertence ao usuário
       if (categoriaId) {
-        const categoria = await prisma.category.findUnique({
-          where: { id: parseInt(categoriaId) }
+        const categoria = await prisma.category.findFirst({
+          where: {
+            id: parseInt(categoriaId),
+            userId
+          }
         });
 
         if (!categoria) {
@@ -118,10 +131,13 @@ const lancamentoController = {
         }
       }
 
-      // Validar lancamentoPaiId se fornecido
+      // Validar lancamentoPaiId se fornecido e pertence ao usuário
       if (lancamentoPaiId) {
-        const lancamentoPai = await prisma.lancamento.findUnique({
-          where: { id: parseInt(lancamentoPaiId) }
+        const lancamentoPai = await prisma.lancamento.findFirst({
+          where: {
+            id: parseInt(lancamentoPaiId),
+            userId
+          }
         });
 
         if (!lancamentoPai) {
@@ -144,6 +160,7 @@ const lancamentoController = {
           valor: parseFloat(valor),
           data: new Date(data),
           tipo,
+          userId,
           categoriaId: categoriaId ? parseInt(categoriaId) : null,
           numeroParcelas: numeroParcelas ? parseInt(numeroParcelas) : null,
           parcelaAtual: parcelaAtual ? parseInt(parcelaAtual) : null,
@@ -167,6 +184,7 @@ const lancamentoController = {
           valor: lancamento.valor,
           data: lancamento.data,
           tipo: lancamento.tipo,
+          userId: lancamento.userId,
           categoriaId: lancamento.categoriaId,
           numeroParcelas: lancamento.numeroParcelas,
           parcelaAtual: lancamento.parcelaAtual,
@@ -184,9 +202,13 @@ const lancamentoController = {
     try {
       const lancamentoId = parseInt(req.params.id);
       const { descricao, valor, data, tipo, categoriaId, numeroParcelas, parcelaAtual, lancamentoPaiId } = req.body;
+      const userId = req.user.id;
 
-      const existingLancamento = await prisma.lancamento.findUnique({
-        where: { id: lancamentoId }
+      const existingLancamento = await prisma.lancamento.findFirst({
+        where: {
+          id: lancamentoId,
+          userId
+        }
       });
 
       if (!existingLancamento) {
@@ -198,10 +220,13 @@ const lancamentoController = {
         return res.status(400).json({ error: 'Tipo deve ser RECEITA ou DESPESA' });
       }
 
-      // Validar se categoria existe, caso categoriaId seja fornecido
+      // Validar se categoria existe e pertence ao usuário
       if (categoriaId !== undefined && categoriaId !== null) {
-        const categoria = await prisma.category.findUnique({
-          where: { id: parseInt(categoriaId) }
+        const categoria = await prisma.category.findFirst({
+          where: {
+            id: parseInt(categoriaId),
+            userId
+          }
         });
 
         if (!categoria) {
@@ -209,10 +234,13 @@ const lancamentoController = {
         }
       }
 
-      // Validar lancamentoPaiId se fornecido
+      // Validar lancamentoPaiId se fornecido e pertence ao usuário
       if (lancamentoPaiId !== undefined && lancamentoPaiId !== null) {
-        const lancamentoPai = await prisma.lancamento.findUnique({
-          where: { id: parseInt(lancamentoPaiId) }
+        const lancamentoPai = await prisma.lancamento.findFirst({
+          where: {
+            id: parseInt(lancamentoPaiId),
+            userId
+          }
         });
 
         if (!lancamentoPai) {
@@ -264,6 +292,7 @@ const lancamentoController = {
           valor: lancamento.valor,
           data: lancamento.data,
           tipo: lancamento.tipo,
+          userId: lancamento.userId,
           categoriaId: lancamento.categoriaId,
           numeroParcelas: lancamento.numeroParcelas,
           parcelaAtual: lancamento.parcelaAtual,
@@ -280,9 +309,13 @@ const lancamentoController = {
   async deleteLancamento(req, res) {
     try {
       const lancamentoId = parseInt(req.params.id);
+      const userId = req.user.id;
 
-      const existingLancamento = await prisma.lancamento.findUnique({
-        where: { id: lancamentoId }
+      const existingLancamento = await prisma.lancamento.findFirst({
+        where: {
+          id: lancamentoId,
+          userId
+        }
       });
 
       if (!existingLancamento) {
@@ -303,6 +336,7 @@ const lancamentoController = {
   async createLancamentoParcelado(req, res) {
     try {
       const { descricao, valorTotal, dataInicial, tipo, categoriaId, numeroParcelas } = req.body;
+      const userId = req.user.id;
 
       // Validações
       if (!descricao) {
@@ -329,10 +363,13 @@ const lancamentoController = {
         return res.status(400).json({ error: 'Número de parcelas deve ser maior ou igual a 2' });
       }
 
-      // Validar se categoria existe
+      // Validar se categoria existe e pertence ao usuário
       if (categoriaId) {
-        const categoria = await prisma.category.findUnique({
-          where: { id: parseInt(categoriaId) }
+        const categoria = await prisma.category.findFirst({
+          where: {
+            id: parseInt(categoriaId),
+            userId
+          }
         });
 
         if (!categoria) {
@@ -351,6 +388,7 @@ const lancamentoController = {
           valor: parseFloat(valorTotal),
           data: dataBase,
           tipo,
+          userId,
           categoriaId: categoriaId ? parseInt(categoriaId) : null,
           numeroParcelas: parseInt(numeroParcelas),
           parcelaAtual: 0
@@ -368,6 +406,7 @@ const lancamentoController = {
             valor: valorParcela,
             data: dataParcela,
             tipo,
+            userId,
             categoriaId: categoriaId ? parseInt(categoriaId) : null,
             numeroParcelas: parseInt(numeroParcelas),
             parcelaAtual: i,

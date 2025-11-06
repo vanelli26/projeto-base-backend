@@ -4,10 +4,14 @@ const prisma = new PrismaClient();
 const categoryController = {
   async getAllCategories(req, res) {
     try {
+      const userId = req.user.id; // Pega do token via authMiddleware
+
       const categories = await prisma.category.findMany({
+        where: { userId },
         select: {
           id: true,
-          nome: true
+          nome: true,
+          userId: true
         }
       });
 
@@ -21,12 +25,17 @@ const categoryController = {
   async getCategoryById(req, res) {
     try {
       const categoryId = parseInt(req.params.id);
+      const userId = req.user.id;
 
-      const category = await prisma.category.findUnique({
-        where: { id: categoryId },
+      const category = await prisma.category.findFirst({
+        where: {
+          id: categoryId,
+          userId
+        },
         select: {
           id: true,
-          nome: true
+          nome: true,
+          userId: true
         }
       });
 
@@ -44,6 +53,7 @@ const categoryController = {
   async createCategory(req, res) {
     try {
       const { nome } = req.body;
+      const userId = req.user.id;
 
       if (!nome) {
         return res.status(400).json({ error: 'Nome é obrigatório' });
@@ -51,7 +61,8 @@ const categoryController = {
 
       const category = await prisma.category.create({
         data: {
-          nome
+          nome,
+          userId
         }
       });
 
@@ -59,7 +70,8 @@ const categoryController = {
         message: 'Categoria criada com sucesso',
         category: {
           id: category.id,
-          nome: category.nome
+          nome: category.nome,
+          userId: category.userId
         }
       });
     } catch (error) {
@@ -72,9 +84,13 @@ const categoryController = {
     try {
       const categoryId = parseInt(req.params.id);
       const { nome } = req.body;
+      const userId = req.user.id;
 
-      const existingCategory = await prisma.category.findUnique({
-        where: { id: categoryId }
+      const existingCategory = await prisma.category.findFirst({
+        where: {
+          id: categoryId,
+          userId
+        }
       });
 
       if (!existingCategory) {
@@ -96,7 +112,8 @@ const categoryController = {
         message: 'Categoria atualizada com sucesso',
         category: {
           id: category.id,
-          nome: category.nome
+          nome: category.nome,
+          userId: category.userId
         }
       });
     } catch (error) {
@@ -108,9 +125,13 @@ const categoryController = {
   async deleteCategory(req, res) {
     try {
       const categoryId = parseInt(req.params.id);
+      const userId = req.user.id;
 
-      const existingCategory = await prisma.category.findUnique({
-        where: { id: categoryId }
+      const existingCategory = await prisma.category.findFirst({
+        where: {
+          id: categoryId,
+          userId
+        }
       });
 
       if (!existingCategory) {

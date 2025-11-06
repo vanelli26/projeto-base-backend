@@ -4,12 +4,16 @@ const prisma = new PrismaClient();
 const contaController = {
   async getAllContas(req, res) {
     try {
+      const userId = req.user.id;
+
       const contas = await prisma.conta.findMany({
+        where: { userId },
         select: {
           id: true,
           descricao: true,
           saldo: true,
-          limite: true
+          limite: true,
+          userId: true
         }
       });
 
@@ -23,14 +27,19 @@ const contaController = {
   async getContaById(req, res) {
     try {
       const contaId = parseInt(req.params.id);
+      const userId = req.user.id;
 
-      const conta = await prisma.conta.findUnique({
-        where: { id: contaId },
+      const conta = await prisma.conta.findFirst({
+        where: {
+          id: contaId,
+          userId
+        },
         select: {
           id: true,
           descricao: true,
           saldo: true,
-          limite: true
+          limite: true,
+          userId: true
         }
       });
 
@@ -48,6 +57,7 @@ const contaController = {
   async createConta(req, res) {
     try {
       const { descricao, saldo, limite } = req.body;
+      const userId = req.user.id;
 
       if (!descricao) {
         return res.status(400).json({ error: 'Descrição é obrigatória' });
@@ -65,7 +75,8 @@ const contaController = {
         data: {
           descricao,
           saldo: parseFloat(saldo),
-          limite: parseFloat(limite)
+          limite: parseFloat(limite),
+          userId
         }
       });
 
@@ -75,7 +86,8 @@ const contaController = {
           id: conta.id,
           descricao: conta.descricao,
           saldo: conta.saldo,
-          limite: conta.limite
+          limite: conta.limite,
+          userId: conta.userId
         }
       });
     } catch (error) {
@@ -88,9 +100,13 @@ const contaController = {
     try {
       const contaId = parseInt(req.params.id);
       const { descricao, saldo, limite } = req.body;
+      const userId = req.user.id;
 
-      const existingConta = await prisma.conta.findUnique({
-        where: { id: contaId }
+      const existingConta = await prisma.conta.findFirst({
+        where: {
+          id: contaId,
+          userId
+        }
       });
 
       if (!existingConta) {
@@ -113,7 +129,8 @@ const contaController = {
           id: conta.id,
           descricao: conta.descricao,
           saldo: conta.saldo,
-          limite: conta.limite
+          limite: conta.limite,
+          userId: conta.userId
         }
       });
     } catch (error) {
@@ -125,9 +142,13 @@ const contaController = {
   async deleteConta(req, res) {
     try {
       const contaId = parseInt(req.params.id);
+      const userId = req.user.id;
 
-      const existingConta = await prisma.conta.findUnique({
-        where: { id: contaId }
+      const existingConta = await prisma.conta.findFirst({
+        where: {
+          id: contaId,
+          userId
+        }
       });
 
       if (!existingConta) {
